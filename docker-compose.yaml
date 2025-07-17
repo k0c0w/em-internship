@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    environment:
+      - CONFIG_PATH=/config/crud.yaml
+    ports:
+      - "8080:8080"
+    configs:
+      - source: crud_config
+        target: /config/crud.yaml
+    depends_on: [db]
+
+    networks:
+      - app-network
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: subscriptions
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+configs:
+  crud_config:
+    content: |
+      storage:
+        should-migrate: true
+        host: "db"
+        port: 5432
+        user: "user"
+        pass: "password"
+        db: "subscriptions"
+        tls: false
+      http:
+        address: ":8080"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:

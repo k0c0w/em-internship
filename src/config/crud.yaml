@@ -1,0 +1,11 @@
+storage:
+  should-migrate: true
+  host: ""
+  port: 5432
+  user: ""
+  pass: ""
+  db: ""
+  tls: false
+
+http:
+  address: ""

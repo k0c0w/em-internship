@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Subscription management API
+  version: 1.0.0
+paths:
+  /subscriptions:
+    post:
+      summary: Add a new subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddOrUpdateSubscription'
+      responses:
+        '201':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List all subscriptions
+      responses:
+        '200':
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/{id}:
+    get:
+      summary: Get subscription by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Update subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddOrUpdateSubscription'
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Subscription deleted
+        '404':
+          description: Subscription was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /subscriptions/total-cost:
+    get:
+      summary: Calculate total cost of subscriptions
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: service_name
+          in: query
+          required: true
+          minLength: 1
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+            nullable: true
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+            nullable: true
+      responses:
+        '200':
+          description: Total cost
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalCostResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        service_name:
+          type: string
+        price:
+          type: integer
+          format: int64
+        user_id:
+          type: string
+          format: uuid
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+        - id
+        - service_name
+        - price
+        - user_id
+        - start_date
+    AddOrUpdateSubscription:
+      type: object
+      properties:
+        service_name:
+          type: string
+        price:
+          type: integer
+          format: int64
+          minimum: 0
+        user_id:
+          type: string
+          format: uuid
+        start_date:
+          type: string
+          format: date
+          nullable: false
+        end_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+        - service_name
+        - price
+        - user_id
+        - start_date
+    TotalCostResponse:
+      type: object
+      properties:
+        total_cost:
+          type: integer
+          format: int64
